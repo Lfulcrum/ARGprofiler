@@ -35,6 +35,7 @@ rule trim_paired_end_reads:
 		singleton="results/trimmed_reads/paired_end/{paired_reads}/{paired_reads}_singleton.trimmed.fastq",
 		check_file_trim="results/trimmed_reads/paired_end/{paired_reads}/{paired_reads}_check_file_trim.txt"
 	params:
+		trimming=config["trimming"],
 		overlap_diff_limit=config["overlap_diff_limit"],
 		average_qual=config["average_qual"],
 		length_required=config["length_required"],
@@ -52,9 +53,16 @@ rule trim_paired_end_reads:
 		"results/trimmed_reads/paired_end/{paired_reads}/{paired_reads}.log"
 	shell:
 		"""
-		{params.time} -v --output=results/trimmed_reads/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bench fastp -i {input.in1} -I {input.in2} -o {output.out1} -O {output.out2} --merge --merged_out {params.out_merge} --unpaired1 {output.singleton} --unpaired2 {output.singleton} --overlap_diff_limit {params.overlap_diff_limit} --average_qual {params.average_qual} --length_required {params.length_required} {params.cut_tail} -h {params.h} -w {threads} -j {params.j} 2> {log}
-		cat {params.out_merge} >> {output.singleton} 2>> {log}
-		rm {params.out_merge}
+		if [ "{params.trimming}" = "True" ]; then
+			{params.time} -v --output=results/trimmed_reads/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bench fastp -i {input.in1} -I {input.in2} -o {output.out1} -O {output.out2} --merge --merged_out {params.out_merge} --unpaired1 {output.singleton} --unpaired2 {output.singleton} --overlap_diff_limit {params.overlap_diff_limit} --average_qual {params.average_qual} --length_required {params.length_required} {params.cut_tail} -h {params.h} -w {threads} -j {params.j} 2> {log}
+			cat {params.out_merge} >> {output.singleton} 2>> {log}
+			rm {params.out_merge}
+		else
+			echo "trimming disabled: passing raw reads through" > {log}
+			zcat {input.in1} > {output.out1} 2>> {log}
+			zcat {input.in2} > {output.out2} 2>> {log}
+			touch {output.singleton}
+		fi
 		touch {output.check_file_trim}
 		"""
 

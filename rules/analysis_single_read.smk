@@ -31,6 +31,7 @@ rule trim_single_end_reads:
 		"results/trimmed_reads/single_end/{single_reads}/{single_reads}.trimmed.fastq",
 		check_file_trim="results/trimmed_reads/single_end/{single_reads}/{single_reads}_check_file_trim.txt"
 	params:
+		trimming=config["trimming"],
 		overlap_diff_limit=config["overlap_diff_limit"],
 		average_qual=config["average_qual"],
 		length_required=config["length_required"],
@@ -47,7 +48,12 @@ rule trim_single_end_reads:
 		"results/trimmed_reads/single_end/{single_reads}/{single_reads}.log"
 	shell:
 		"""
-		{params.time} -v --output=results/trimmed_reads/single_end/{wildcards.single_reads}/{wildcards.single_reads}.bench fastp -i {input} -o {output} --overlap_diff_limit {params.overlap_diff_limit} --average_qual {params.average_qual} --length_required {params.length_required} {params.cut_tail} -h {params.h} -w {threads} -j {params.j} 2> {log}
+		if [ "{params.trimming}" = "True" ]; then
+			{params.time} -v --output=results/trimmed_reads/single_end/{wildcards.single_reads}/{wildcards.single_reads}.bench fastp -i {input} -o {output[0]} --overlap_diff_limit {params.overlap_diff_limit} --average_qual {params.average_qual} --length_required {params.length_required} {params.cut_tail} -h {params.h} -w {threads} -j {params.j} 2> {log}
+		else
+			echo "trimming disabled: passing raw reads through" > {log}
+			zcat {input} > {output[0]} 2>> {log}
+		fi
 		touch {output.check_file_trim}
 		"""
 

@@ -9,6 +9,10 @@ zenodo_motus_tar: "https://zenodo.org/records/5140350/files/db_mOTU_v3.0.1.tar.g
 # fastq-dl parameters
 max_attempts: 2
 
+# whether to perform adapter/quality trimming with fastp (on by default)
+# if False, raw reads are passed through unchanged (just decompressed)
+trimming: True
+
 # parameters for fastp
 overlap_diff_limit: "1"
 average_qual: "20"

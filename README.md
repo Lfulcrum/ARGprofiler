@@ -117,6 +117,7 @@ When successfully executed, ARGprofiler creates a directory named ``` results ``
 	
 	* We provide a [config file](profile_argprofiler/config.yaml) for executing the pipeline in an HPC with qsub
 * To save space ARGprofiler, by default, removes the raw and trimmed reads from each sample upon successful competition of all rules.
+* Adapter/quality trimming with ```fastp``` is enabled by default. To disable it, set ```trimming: False``` in the config file; raw reads will then be passed through unchanged (decompressed only) to the downstream analysis steps.
 * Besides the regular output files, the kma_PanRes rule also outputs a BAM file.
 * ARGextender will, by default, run until there is nothing more to extend.
 * The user should create a ``` logs ``` directory in the main directory. Log files for each job will be placed there.
