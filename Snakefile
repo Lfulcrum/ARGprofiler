@@ -42,7 +42,7 @@ def build_inputs(jsonFile, local_folder='local_reads'):
         m2 = p2.match(fastqFile)
         m = m1 if m1 else m2
         if m is not None:
-            sample_id = os.path.basename(fastqFile).split(m.group(1))[0]
+            sample_id = os.path.basename(fastqFile).rsplit(m.group(1), maxsplit=1)[0]
             sample_id = re.sub(r"([-_])$", "", sample_id)
             paired_files[sample_id].add(fastqFile)
             paired.add(sample_id)
