@@ -1,0 +1,22 @@
+executor: lsf-sanger
+use-conda: true
+keep-going: true
+rerun-incomplete: true
+jobs: 10
+latency-wait: 60
+retries: 1
+default-resources:
+    lsf_queue: "'normal' if attempt == 1 else 'long' if attempt == 2 else 'week'"
+    mem_mb: 4000*attempt
+    threads: 1
+set-resources:
+    index_db_mOTUs:
+        mem_mb: 32000
+    kma_paired_end_reads_mOTUs:
+        mem_mb: 8000*attempt
+    kma_single_end_reads_mOTUs:
+        mem_mb: 4000*attempt
+    ARG_extender_paired_reads:
+        mem_mb: 16000*attempt
+    ARG_extender_single_reads:
+        mem_mb: 16000*attempt
