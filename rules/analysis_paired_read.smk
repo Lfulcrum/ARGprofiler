@@ -93,7 +93,11 @@ rule kma_paired_end_reads_mOTUs:
 		"results/kma_mOTUs/paired_end/{paired_reads}/{paired_reads}.log"
 	shell:
 		"""
-		{params.time} -v --output=results/kma_mOTUs/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bench kma -ipe {input.read_1} {input.read_2} -i {input.read_3} -o {params.outdir} -t_db {params.db} {params.kma_params} -t {threads} 2>> {log}
+		singleton_arg=""
+		if [ -s {input.read_3} ]; then
+			singleton_arg="-i {input.read_3}"
+		fi
+		{params.time} -v --output=results/kma_mOTUs/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bench kma -ipe {input.read_1} {input.read_2} $singleton_arg -o {params.outdir} -t_db {params.db} {params.kma_params} -t {threads} 2>> {log}
 		rm results/kma_mOTUs/paired_end/{wildcards.paired_reads}/*.aln
 		gzip -f results/kma_mOTUs/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.fsa 2>> {log}
 		touch {output.check_file_kma_mOTUs}
@@ -136,8 +140,12 @@ rule kma_paired_end_reads_panRes:
 		"results/kma_panres/paired_end/{paired_reads}/{paired_reads}.log"
 	shell:
 		"""
-		{params.time} -v --output=results/kma_panres/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bench kma -ipe {input.read_1} {input.read_2} -i {input.read_3} -o {params.outdir} -t_db {params.db} {params.kma_params} -t {threads} 2> {log} |samtools fixmate -m - -|samtools view -u -bh -F 4|samtools sort -o results/kma_panres/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bam 2>> {log}
-		rm results/kma_panres/paired_end/{wildcards.paired_reads}/*.aln 
+		singleton_arg=""
+		if [ -s {input.read_3} ]; then
+			singleton_arg="-i {input.read_3}"
+		fi
+		{params.time} -v --output=results/kma_panres/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bench kma -ipe {input.read_1} {input.read_2} $singleton_arg -o {params.outdir} -t_db {params.db} {params.kma_params} -t {threads} 2> {log} |samtools fixmate -m - -|samtools view -u -bh -F 4|samtools sort -o results/kma_panres/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bam 2>> {log}
+		rm results/kma_panres/paired_end/{wildcards.paired_reads}/*.aln
 		gzip -f results/kma_panres/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.fsa 2>> {log}
 		Rscript prerequisites/mapstat_filtering/mapstatFilters.R -i {params.mapstat} -o {params.mapstat_filtered} -r {params.mapstat_table} 2>> {log}
 		touch {output.check_file_kma_panres}
