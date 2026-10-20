@@ -211,10 +211,14 @@ rule ARG_extender_paired_reads:
 		"results/ARG_extender/paired_end/{paired_reads}/{paired_reads}.log"
 	shell:
 		"""
-		if grep -q -v -m 1 "#" {input.panres_mapstat_filtered}; 
+		if grep -q -v -m 1 "#" {input.panres_mapstat_filtered};
 		then
-			echo "running argextender" > {log} 
-			{params.time} -v --output=results/ARG_extender/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bench perl prerequisites/ARGextender/targetAsm.pl {params.ARG} {threads} {params.temp_dir} {params.db} {input.read_1} {input.read_2} {input.read_3} 2>> {log}
+			echo "running argextender" > {log}
+			reads="{input.read_1} {input.read_2}"
+			if [ -s {input.read_3} ]; then
+				reads="$reads {input.read_3}"
+			fi
+			{params.time} -v --output=results/ARG_extender/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.bench perl prerequisites/ARGextender/targetAsm.pl {params.ARG} {threads} {params.temp_dir} {params.db} $reads 2>> {log}
 			gzip -f results/ARG_extender/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.fasta 2>> {log}
 			gzip -f results/ARG_extender/paired_end/{wildcards.paired_reads}/{wildcards.paired_reads}.gfa 2>> {log}
 			touch {output.check_file_ARG}
